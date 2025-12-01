@@ -1,0 +1,173 @@
+
+DATA CLEANING
+
+
+```{r}
+# load the diabetes_predictions.csv file
+data <- read.csv("./data/diabetes_prediction_dataset.csv", )
+# print the first 5 rows
+head(data,5)
+```
+
+```{r}
+# print the shape or dimension of the data
+dim(data)
+```
+
+
+```{r}
+#display number of unique values for each column
+for (i in 1:ncol(data)){
+   print(paste('column',i, ':',nrow(unique(data[i]))))
+}
+```
+
+
+```{r}
+# display the percentage of unique values for each columns
+for (i in 1:ncol(data)){
+  percentage <- (nrow(unique(data[i])) / nrow(data)) * 100
+   print(paste('column',i, ':', percentage, "%"))
+  
+}
+```
+
+
+
+```{r}
+# display columns that have less than 1% unique values
+for (i in 1:ncol(data)){
+  
+  col_data <- data[[i]]
+  unique_count <- length(unique(col_data))
+  percentage_unique <- (unique_count / nrow(data)) * 100
+  
+  if (percentage_unique < 1) {
+    print(paste("Column", i, "has less than 1% unique values:", 
+                round(percentage_unique, 4), "%"))
+  }
+}
+
+```
+
+
+
+```{r}
+to_del <- c()
+for (i in 1:ncol(data)) {
+  n_unique <- length(unique(data[[i]]))
+  if (n_unique == 1) {
+    to_del <- c(to_del, i)
+  }
+}
+
+# Print the names of columns to delete
+print(paste("Columns to delete:", colnames(data)[to_del]))
+
+# Print dimensions before deletion
+print(dim(data))
+
+# Delete the columns
+data <- data[, sapply(data, function(x) length(unique(x)) > 1)]
+
+# Print dimensions after deletion
+print(dim(data))
+
+```
+
+
+```{r}
+# delete columns that has less than 1% unique values
+to_del <- c ()
+for (i in 1:ncol(data)){
+  n_unique <- length(unique(data[i]))
+  if (n_unique == 1){
+    to_del<- cbind (to_del , i)
+  }
+}
+print (to_del)
+#print the column to delete
+print(paste("Columns to delete:", toString(to_del)))
+#print the dimension of the data
+print(paste("Original dimensions:", paste(dim(data), collapse = " x ")))
+#delete the column
+data <- data[, sapply(data, function(x) length(unique(x)) > 1)]
+#print the dimension of the new data
+print(paste("New dimensions:", paste(dim(data), collapse = " x ")))
+```
+LOGISTIC REGRESSION 
+
+
+```{r}
+data <- read.csv("diabetes_cleaned.csv", header = F );
+```
+```{r}
+diabetes_data$diabetes <- factor(diabetes_data$diabetes,
+                                 levels = c(0,1),
+                                 labels = c("No","Yes"))
+
+```
+
+
+```{r}
+i <- 1
+predictors <- list(
+  c("age"),
+  c("age", "bmi"),
+  c("age", "bmi", "HbA1c_level"),
+  c("age", "bmi", "HbA1c_level", "blood_glucose_level")
+) ;
+
+while (i <= length(predictors)) {
+formula <- as.formula(
+    paste("diabetes ~", paste(predictors[[i]], collapse = " + "))
+  );
+ model <- glm(formula, data = diabetes_data, family = binomial)
+
+i <- i + 1
+}
+
+```
+```{r}
+# Example predictors
+predictors <- c("age", "bmi", "HbA1c_level", "blood_glucose_level")
+
+i <- 1
+models <- list()
+
+while (i <= length(predictors)) {
+  formula <- as.formula(paste("diabetes ~", predictors[i]))
+  models[[i]] <- glm(formula, data = diabetes_data, family = binomial)
+  i <- i + 1
+}
+```
+
+
+```{r}
+# Example predictors as list of sets
+predictors <- list(
+  c("age"),
+  c("age","bmi"),
+  c("age","bmi","HbA1c_level")
+)
+
+i <- 1
+models <- list()
+
+while (i <= length(predictors)) {
+  formula <- as.formula(paste("diabetes ~", paste(predictors[[i]], collapse = " + ")))
+  models[[i]] <- glm(formula, data = diabetes_data, family = binomial)
+  i <- i + 1
+}
+
+```
+
+
+
+
+
+
+
+
+
+

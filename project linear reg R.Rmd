@@ -1,0 +1,183 @@
+'
+DATA CLEANING
+
+
+```{r}
+# load the insurance.csv file
+data <- read.csv("./data/insurance.csv", header=F)
+# print the first 5 rows
+head(data,5)
+```
+
+```{r}
+# print the shape or dimension of the data
+dim(data)
+```
+
+
+```{r}
+#display number of unique values for each column
+for (i in 1:ncol(data)){
+   print(paste('column',i, ':',nrow(unique(data[i]))))
+}
+```
+
+
+
+```{r}
+# display the percentage of unique values for each columns
+for (i in 1:ncol(data)){
+  percentage <- (nrow(unique(data[i])) / nrow(data)) * 100
+   print(paste('column',i, ':', percentage, "%"))
+  
+}
+```
+
+
+```{r}
+# display columns that have less than 1% unique values
+for (i in 1:ncol(data)){
+  
+  col_data <- data[[i]]
+  unique_count <- length(unique(col_data))
+  percentage_unique <- (unique_count / nrow(data)) * 100
+  
+  if (percentage_unique < 1) {
+    print(paste("Column", i, "has less than 1% unique values:", 
+                round(percentage_unique, 4), "%"))
+  }
+}
+
+```
+
+
+
+```{r}
+# Remove columns with only one unique value
+to_del <- c()
+for (i in 1:ncol(data)) {
+  n_unique <- length(unique(data[[i]]))
+  if (n_unique == 1) {
+    to_del <- c(to_del, i)
+  }
+}
+
+# Print the names of columns to delete
+print(paste("Columns to delete:", colnames(data)[to_del]))
+
+# Print the dimensions before deletion
+print(dim(data))
+
+# Delete the columns
+data <- data[, sapply(data, function(x) length(unique(x)) > 1)]
+
+# Print the dimensions after deletion
+print(dim(data))
+
+```
+
+
+```{r}
+# delete columns that has less than 1% unique values
+to_del <- c ()
+for (i in 1:ncol(data)){
+  n_unique <- length(unique(data[i]))
+  if (n_unique == 1){
+    to_del<- cbind (to_del , i)
+  }
+}
+print (to_del)
+#print the column to delete
+print(paste("Columns to delete:", toString(to_del)))
+#print the dimension of the data
+print(paste("Original dimensions:", paste(dim(data), collapse = " x ")))
+#delete the column
+data <- data[, sapply(data, function(x) length(unique(x)) > 1)]
+#print the dimension of the new data
+print(paste("New dimensions:", paste(dim(data), collapse = " x ")))
+```
+LINEAR REGRESSION
+
+
+```{r}
+# Load the cleaned insurance dataset
+data <- read.csv("./data/insurance.csv", header=TRUE)
+
+# Inspect the data
+head(data)
+```
+
+
+```{r}
+#  BMI vs Charges
+colnames(data)
+
+```
+
+
+```{r}
+plot(data$bmi, data$charges,
+     pch=16,
+     xlab="BMI",
+     ylab="Charges",
+     main="BMI vs Charges",
+     col="green")
+
+
+
+# Fit a linear regression model
+model <- lm(charges ~ bmi, data=data)
+
+# Add regression line to the plot
+abline(model, b=theta[2], col="red", lwd=2)
+
+```
+
+
+```{r}
+# Print summary of the model
+summary(model)
+
+```
+```{r}
+costfunction <- function(X, y, theta = c(0, 0)) {
+  m <- length(y)
+  ones <- matrix(1, m, 1)
+  X_extend <- cbind(ones, X)
+  h <- X_extend %*% theta
+  J <- sum((h - y)^2) / (2 * m)
+  return(J)
+}
+
+
+# Compute initial cost with theta = (0,0)
+costfunction(data$bmi, data$charges)
+
+```
+```{r}
+# Gradient descent function
+gradientDescent <- function(X, y, theta = c(0, 0), alpha = 0.00001, iterations = 1500) {
+  m <- length(y)
+  ones <- matrix(1, m, 1)
+  X_extend <- cbind(ones, X)
+  theta <- matrix(theta, ncol=1)       # ensure theta is a column vector
+  
+  for (i in 1:iterations) {
+    h <- X_extend %*% theta
+    error <- h - y
+    gradient <- (t(X_extend) %*% error) / m
+    theta <- theta - alpha * gradient
+  }
+  
+  return(theta)
+}
+
+
+# Run gradient descent
+theta <- gradientDescent(data$bmi, data$charges)
+print(theta)
+
+
+```
+
+
